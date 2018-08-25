@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>US Wildfire Map</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
+  <link rel="stylesheet" type="text/css" href={{ url_for('static', filename='style.css') }}>
+</head>
+
+<style>
+      html {
+      min-height: 100vh;
+      min-height: 100%;
+      text-align: left;
+    }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #93B874;
+
+    }
+    .jumbotron {
+      background-image: url("//upload.wikimedia.org/wikipedia/commons/b/b8/Deerfire.jpg");
+      background-size: cover;
+      padding: 80px 0px;
+    
+      margin: 0px;
+    }
+
+      .counties {
+    fill: white;
+  }
+  
+  .states {
+    fill: none;
+    stroke: #fff;
+    stroke-linejoin: round;
+  } 
+
+  .states :hover {
+    fill: red;
+  }
+  
+  .state-borders {
+    fill: none;
+    stroke: rgb(104, 100, 100);
+    stroke-width: 0.5px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+
+  #play, #clock {
+    top: 15px;
+  }
+  #play {
+    left: 45px;
+  }
+  #clock {
+    left: 65px;
+  }
+  /* .legend {
+  color: #555;
+  padding: 6px 6px;
+  font: 12px Arial, Helvetica, sans-serif;
+  font-weight: bold;
+  background: white;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  border-radius: 5px;
+  height: 168px; */
+/* }
+  .legend ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  width: 40px;
+  position: absolute;
+  /* clear: both; */
+/* } */
+/* .legend li {
+  /* display: inline-block; */
+  /* width: 30px;
+  height: 22px;
+}
+h4 {
+  font-size: 14px;
+  line-height: 1;
+  padding: 0px;
+  margin: 0px;
+  margin-bottom: 6px; */
+
+  </style>
+    
+<body>
+
+      <div class="container">
+          <div class="jumbotron">
+            <h1 class="header" style="color: #FFF; font-weight: normal; text-shadow: #000 2px 2px 3px;">1.88 Million US Wildfires</h1>
+      
+          </div>
+
+      <!-- <div class="container">
+        <div class="jumbotron">
+          <h1 class="header" style="color: #FFF; font-weight: normal; text-shadow: #000 2px 2px 3px;">Mission to Mars</h1>
+          <p class="button-p"><a class="btn btn-primary btn-lg button-text" href="/scrape" role="button">Scrape New Data</a></p>
+        </div> -->
+
+  </div>    
+  <div class="container">
+  
+    </div>
+    <br>
+    <br>
+    <div class="landscape">
+  
+        <div class="container">
+              <h4 class="card-header header"><strong>Wildfires occurring from 1992 to 2015</strong></h4>
+              <!--img style='height: 60%; width: 60%; object-fit: contain' src="Firechart1.jpg" alt="(lighter color means more wildfires)"-->
+              <img src= "/static/images/Firechart1.jpg"style='height: 60%; width: 60%; object-fit: contain' >
+            </div>
+          </div>
+
+
+  <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <br>
+
+    <h4 class="container"><strong>Circles correspond to Fire Size, please Zoom to see greater detail (click to see cause of fire):</strong></h4>
+
+    <div class="landscape"></div>
+      <div id="map"style='height: 90%; width: 80%; object-fit: center'></div>
+
+  <script type="text/javascript" src={{ url_for('static', filename='config.js') }}></script> 
+  <script type="text/javascript" src={{ url_for('static', filename='logic.js') }}></script>
+
+  <!-- TEST TEST -->
+
+  <div class="container">
+      <div class="row">
+          <br>
+          <hr>
+        <div class="col-md-2">
+          <div class="well">
+            <h5>States:</h5>
+            <select id="plotly" onchange="plotlyStateChanged(this.value)"></select>
+          </div>
+        </div>
+        <div class="col-md-10">
+          <div id="bar"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <br>
+      <hr>
+      <h4 class="container"><strong>Estimate of acres within the final perimeter of the fire by year</strong></h4>
+        <div class="col-md-2">
+            <div class="well">
+                <h5><strong>Select by Year:</strong></h5> 
+                <button id="play">play</button>
+                <span id="clock">year</span>
+                <p></p>
+              <!-- <h5>Year:</h5> -->
+              <select id="selYear" onchange="cloroplethChanged(this.value)"></select>
+            </div>
+          </div>
+      <div class="col-md-10">
+        <svg id="cloropleth" width="960" height="600"></svg>
+      </div>
+    </div>
+  
+    <script src="https://cdn.plot.ly/plotly-1.31.2.min.js"></script>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.5.0/d3.js"></script> -->
+    
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- <script src="{{ url_for('static', filename='js/bonus.js') }}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='js/app.js') }}"></script> -->
+    <script type="text/javascript" src={{ url_for('static', filename='app.js') }}></script>
+    <script type="text/javascript" src={{ url_for('static', filename='config.js') }}></script>
+
+</body>
+</html>
